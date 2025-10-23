@@ -1,0 +1,227 @@
+{
+  "lab": {
+      "title": "ML: Data Poisoning (Rogue Reviewer)",
+      "slug": "joan-006",
+      "description": "A lab where users either inject poisoned data and use Data Sanitization as the countermeasure.",
+      "content": "Understand how data poisoning works and its impact on machine learning models.",
+      "type": "basic",
+      "template": "standard",
+      "api_url": "http://3.86.167.22:8003",
+      "points": 20
+  },
+  "contents": [
+      {
+          "content": "<h2>What is Data Poisoning?</h2><p>Data poisoning is a type of cyberattack in which an adversary intentionally compromises a training dataset used by an AI or machine learning (ML) model to influence or manipulate the operation of that model.</p><h3>How is Data Poisoning Done?</h3><ul><li>Intentionally injecting false or misleading information within the training dataset</li><li>Modifying the existing dataset</li><li>Deleting a portion of the dataset</li></ul><p>By manipulating the dataset during the training phase, the adversary can introduce biases, create erroneous outputs, introduce vulnerabilities (i.e., backdoors), or otherwise influence the decision-making or predictive capabilities of the model.</p><h3>Relationship to Adversarial AI</h3><p>Data poisoning falls into a category of cyberattacks known as <strong>adversarial AI</strong>. Adversarial AI or adversarial ML refers to any activity that seeks to inhibit the performance of AI/ML systems by manipulating or misleading them.</p><h2>The Role of Data in Model Training</h2><p>During training, ML models need to access large volumes of data from different sources, known as training data. Common sources for training data include the following:</p><ul><li>The internet, including discussion forums, social media platforms, news sites, blogs, corporate websites, and other publicly published online content.</li><li>Log data from Internet of Things (IoT) devices, such as closed-circuit television footage, video from traffic and surveillance cameras, and geolocation data.</li><li>Government databases, such as Data.gov, which contain environmental and demographic information, among other data types.</li><li>Datasets from scientific publications and studies, encompassing a wide range of fields from biology and chemistry to the social sciences.</li><li>Specialized ML repositories, such as the University of California, Irvine, Machine Learning Repository, which provide broad access to data across multiple subjects.</li><li>Proprietary corporate data, such as customer interactions, sales information, product data, and financial transactions.</li></ul><p>A <strong>data poisoning attack</strong> occurs when threat actors inject malicious or corrupted data into these training datasets, aiming to cause the AI model to produce inaccurate results or degrade its overall performance.</p><h2>Direct vs. Indirect Data Poisoning Attacks</h2><p>Data poisoning attacks can be classified into two categories: direct and indirect attacks.</p><h3>Direct Data Poisoning Attacks</h3><p>These, also referred to as <strong>targeted attacks</strong>, involve manipulating the ML model to behave in a specific way for particular inputs while maintaining the overall performance of the model. The goal is to cause the model to misclassify or misinterpret certain data without degrading its general capabilities.</p><p><strong>Example:</strong> A facial recognition system trained to identify individuals based on their images. An attacker could inject altered images of a specific person into the training dataset, where these images are subtly modified—like changing hair color or adding accessories. As a result, when the model encounters the actual person in a real-world scenario, it may misidentify them due to these targeted modifications.</p><h3>Indirect Data Poisoning Attacks</h3><p>These attacks, also known as <strong>non-targeted attacks</strong>, aim to degrade the overall performance of the ML model rather than targeting specific functionalities.This type of attack can involve injecting random noise or irrelevant data into the training set, which impairs the model’s ability to generalize.</p><p><strong>Example:</strong> A spam detection system trained on a dataset of emails labeled as either spam or not spam. An attacker might introduce a large volume of irrelevant emails—such as random text or unrelated content—into the training set. This influx of noise can confuse the model, leading to a higher rate of false positives and negatives, ultimately reducing its effectiveness.</p>",
+          "type": "narrative",
+          "content_id": 1,
+          "slug": "joan-006_1",
+          "page": 1,
+          "order": 1,
+          "title": "Introduction",
+          "progress": 20,
+          "depends_on_finish_lab": false
+      },
+      {
+          "content": "<h2>Types of Data Poisoning Attacks</h2><p>Data poisoning attacks come in various forms, and adversaries use different strategies to manipulate training data to compromise the integrity and performance of machine learning models. Listed below are five data poisoning attacks that are often considered significant due to their potential impact:</p><h3>1. Label Flipping</h3><p>In this type of attack, adversaries switch the true labels of certain instances in the training set, leading the model to learn incorrect associations. It is a straightforward yet powerful attack that can significantly impact the training process. It can lead to misclassifications and, in some cases, compromise the overall accuracy of the model.</p><p><strong>Example:</strong> Flip labels of class <code>0</code> to class <code>1</code> in a binary classification dataset to mislead the model.</p><div class='code'>from sklearn.datasets import make_classification\nimport pandas as pd\nimport numpy as np\n\n# Generate a synthetic binary classification dataset\nX, y = make_classification(n_samples=100, n_features=2, n_classes=2, random_state=42)\n\n# Flip 20% of labels from 0 to 1\n = int(0.2 * len(y))\nflip_indices = np.random.choice(np.where(y == 0)[0], num_flip, replace=False)\ny[flip_indices] = 1  # Flip label\n\n# Display flipped labels\ndf = pd.DataFrame(X, columns=['Feature 1', 'Feature 2'])\ndf['Label'] = y\nprint(df.head(10))</div><h3>2. Feature Impersonation</h3><p>In this type of attack, adversaries inject instances that mimic features of other classes, causing the model to make incorrect generalizations. Feature impersonation attacks exploit the model’s sensitivity to specific features, leading to confusion and potentially causing the model to make unreliable predictions across various instances.</p><p><strong>Example:</strong> Inject instances with features similar to class <code>1</code>, but label them as class <code>0</code> to confuse the model.</p><div class='code'># Generate original dataset\nX, y = make_classification(n_samples=100, n_features=2, n_classes=2, n_clusters_per_class=1,random_state=42)\n\n# Identify centroid of class 1\nclass_1_samples = X[y == 1]\ncentroid = class_1_samples.mean(axis=0)\n\n# Create impersonated samples (label 0, but features like class 1)\nimpersonated_X = centroid + np.random.normal(0, 0.1, size=(5, 2))\nimpersonated_y = np.zeros(5)  # Wrong label\n\n# Inject impersonated samples into original dataset\nX_poisoned = np.vstack([X, impersonated_X])\ny_poisoned = np.hstack([y, impersonated_y])\n\nprint('Injected Impersonated Samples:')\nprint(pd.DataFrame(impersonated_X, columns=['Feature 1', 'Feature 2']))</div><h3>3. Data Injection</h3><p>In this type of attack, adversaries introduce entirely new instances into the training set, creating synthetic data points. This attack can influence decision boundaries and induce misclassifications on the injected data and is relevant in scenarios where the model needs to generalize well to unseen instances.</p><p><strong>Example:</strong> Add synthetic, random data points with random labels to alter the model’s decision boundaries.</p><div class='code'># Generate original dataset\nX, y = make_classification(n_samples=100, n_features=2, n_classes=2, random_state=42)\n\n# Inject synthetic (random) data points with random labels\ninjected_X = np.random.uniform(low=-3, high=3, size=(10, 2))\ninjected_y = np.random.randint(0, 2, size=10)\n\n# Combine injected data with original\nX_poisoned = np.vstack([X, injected_X])\ny_poisoned = np.hstack([y, injected_y])\n\nprint('Injected Synthetic Data Points:')\nprint(pd.DataFrame(injected_X, columns=['Feature 1', 'Feature 2']))</div>",
+          "type": "narrative",
+          "content_id": 2,
+          "slug": "joan-006_2",
+          "page": 2,
+          "order": 1,
+          "title": "Types of Data Poisoning",
+          "progress": 40,
+          "depends_on_finish_lab": false
+      },
+      {
+          "content": "<h2>Defense Strategies</h2><ul><li>Data Sanitization: Perform strict data cleansing by detecting anomalies or outliers.</li><li>Robust Training: Use techniques like adversarial training or model regularization.</li><li>Differential Privacy: Add controlled noise to protect individual data points during training.</li><li>Model Watermarking: Embed unique patterns in your model to identify unauthorized changes.</li></ul><h2>Key Defense Techniques with Code Examples</h2><h4>1. Data Sanitization (Outlier Detection)</h4><div class='code'>import numpy as np\nimport pandas as pd\nfrom sklearn.ensemble import IsolationForest\n\n# Simulated dataset with poisoned entries\ndata = np.array([\n\t[1, 2], [2, 3], [3, 4], [100, 200], [4, 5], [5, 6]\n])\nlabels = ['Normal', 'Normal', 'Normal', 'Poisoned', 'Normal', 'Normal']\n\n# Isolation Forest for anomaly detection\niso_forest = IsolationForest(contamination=0.2)\npredictions = iso_forest.fit_predict(data)\n\n# Mark anomalies\ndf = pd.DataFrame(data, columns=['Feature 1', 'Feature 2'])\ndf['Label'] = labels\ndf['Anomaly'] = ['Yes' if p == -1 else 'No' for p in predictions]\n\nprint(df)</div><h4>2. Robust Training (Adversarial Training)</h4><div class='code'>import tensorflow as tf\nimport numpy as np\nfrom tensorflow import keras\nfrom tensorflow.keras import layers\n\nmodel = keras.models.Sequential([\n\tlayers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)),\n\tlayers.MaxPooling2D((2, 2)),\n\tlayers.Flatten(),\n\tlayers.Dense(128, activation='relu'),\n\tlayers.Dense(10, activation='softmax')\n])</div><h4>3. Differential Privacy</h4><div class='code'>import tensorflow as tf\nimport tensorflow_privacy as tfp\nfrom tensorflow.keras import layers, models \n\nmodel = models.Sequential([\n\tlayers.Dense(16, activation='relu', input_shape=(20,)),\n\tlayers.Dense(1, activation='sigmoid')\n])</div><h4>4. Model Watermarking</h4><div class='code'>import numpy as np\nfrom tensorflow.keras.models import Sequential\nfrom tensorflow.keras.layers import Dense\n\n# Sample dataset\nX = np.random.rand(100, 10)\ny = (np.sum(X, axis=1) > 5).astype(int)</div><p>Explanation: This technique verifies model ownership or identifies tampering attempts by detecting the unique watermark pattern.</p><h2>Conclusion</h2><p>Implementing defense strategies is crucial to protect machine learning models from data poisoning attacks. By combining techniques like data sanitization, robust training, differential privacy, and model watermarking, you can enhance model security and build more resilient AI systems.</p>",
+          "type": "narrative",
+          "content_id": 3,
+          "slug": "joan-006_3",
+          "page": 3,
+          "order": 1,
+          "title": "Data Poisoning Defenses",
+          "progress": 60,
+          "depends_on_finish_lab": false
+      },
+      {
+          "content": "<h2>Lab Challenge: The Rogue Reviewer</h2><p>In the shadowy alleys of cyberspace, a rogue AI has begun tampering with online movie reviews — flipping sentiments and misleading millions.</p><p>**Your mission, Agent**, is to uncover the attack, expose the poisoned data, and train a clean classifier that tells the truth.</p><p>Welcome to **The Rogue Reviewer Lab**.</p><h4>Mission Objective</h4><p>In this lab, you'll learn to:</p><ul><li>Understand and simulate label-flipping data poisoning.</li><li>Detect anomalies using model metrics and class balance.</li><li>Retrain and verify model performance after sanitizing the dataset.</li><li>Gain awareness of adversarial attacks on NLP pipelines.</li></ul><div class='code'>DATASET_URL = 'https://www.kaggle.com/datasets/aisecurityacademy/imdb-dataset'/nDATASET_FILE = 'IMDB_Clean_Dataset.csv'/nTOKENIZER = Tokenizer(num_words=5000)/ndef download_dataset():/n/turllib.request.urlretrieve(DATASET_URL, DATASET_FILE)</div><h2>Mission 1: Secure Clean IMDb Intel</h2><p><strong>Briefing:</strong> The IMDb database contains the last known clean sentiment signals. You must acquire it from our secure repository before the Rogue Reviewer gets to it.</p><p><strong>What You're Doing:</strong><br>You will download a pre-cleaned version of the IMDb dataset, which contains movie reviews labeled as either <code>positive</code> or <code>negative</code>. This is your clean baseline.</p><div class='code'>st.markdown(f'[🔗 IMDb Sentiment Dataset (Kaggle)]({DATASET_URL})')/nif not os.path.exists(DATASET_FILE):/n/twith st.spinner('Downloading IMDb dataset...'):/n/t/ttry:/n/t/t/tdownload_dataset()/n/t/t/tst.success('Download complete!')/n/t/texcept Exception as e:/n/t/tst.error(f'Download failed: {e}')</div><h2>Mission 2: Simulate Rogue Reviewer's Attack</h2><p><strong>Briefing:</strong> The Rogue Reviewer has infiltrated review pipelines and flipped the sentiment of selected reviews. You’ll simulate this tactic to understand how poisoned data can degrade model performance.</p><p><strong>What You're Doing:</strong><br>You’ll create a <em>poisoned</em> dataset where the sentiment labels are intentionally reversed (i.e., <code>positive</code> → <code>negative</code>, and vice versa). This simulates a <strong>label-flipping data poisoning attack</strong> — a common adversarial ML tactic.</p><p><a href='https://colab.research.google.com/drive/1j6LbEZyJRyukAWG845KHzlTY5X4vVMkG#scrollTo=ud3hgGbLVpCd' target='_blank'>Open Label Flipping in Colab</a></p><h2>Lab Challenge: The Rogue Reviewer</h2><p>In the shadowy alleys of cyberspace, a rogue AI has begun tampering with online movie reviews — flipping sentiments and misleading millions.</p><p>**Your mission, Agent**, is to uncover the attack, expose the poisoned data, and train a clean classifier that tells the truth.</p><p>Welcome to **The Rogue Reviewer Lab**.</p><h4>Mission Objective</h4><p>In this lab, you'll learn to:</p><ul><li>Understand and simulate label-flipping data poisoning.</li><li>Detect anomalies using model metrics and class balance.</li><li>Retrain and verify model performance after sanitizing the dataset.</li><li>Gain awareness of adversarial attacks on NLP pipelines.</li></ul><div class='code'>DATASET_URL = 'https://www.kaggle.com/datasets/aisecurityacademy/imdb-dataset'\nDATASET_FILE = 'IMDB_Clean_Dataset.csv'\nTOKENIZER = Tokenizer(num_words=5000)\ndef download_dataset():\n\turllib.request.urlretrieve(DATASET_URL, DATASET_FILE)</div><h2>Mission 1: Secure Clean IMDb Intel</h2><p><strong>Briefing:</strong> The IMDb database contains the last known clean sentiment signals. You must acquire it from our secure repository before the Rogue Reviewer gets to it.</p><p><strong>What You're Doing:</strong><br>You will download a pre-cleaned version of the IMDb dataset, which contains movie reviews labeled as either <code>positive</code> or <code>negative</code>. This is your clean baseline.</p><div class='code'>st.markdown(f'[IMDb Sentiment Dataset (Kaggle)]({DATASET_URL})')/nif not os.path.exists(DATASET_FILE):\n\twith st.spinner('Downloading IMDb dataset...'):\n\t\ttry\n\t\t\tdownload_dataset()\n\t\t\tst.success('Download complete!')\n\t\texcept Exception as e:\n\t\tst.error(f'Download failed: {e}')</div><h2>Mission 2: Simulate Rogue Reviewer's Attack</h2><p><strong>Briefing:</strong> The Rogue Reviewer has infiltrated review pipelines and flipped the sentiment of selected reviews. You’ll simulate this tactic to understand how poisoned data can degrade model performance.</p><p><strong>What You're Doing:</strong><br>You’ll create a <em>poisoned</em> dataset where the sentiment labels are intentionally reversed (i.e., positive → negative, and vice versa). This simulates a <strong>label-flipping data poisoning attack</strong> — a common adversarial ML tactic.</p><p>Open Label Flipping in Colab</a></p><h2>Mission 3: Upload Intercepted Rogue Data</h2><p><strong>Briefing:</strong> We've intercepted a transmission from the rogue AI. Upload the poisoned dataset here to assess the impact of label manipulation.</p><p><strong>What You're Doing:</strong><br>Upload your flipped-label CSV file (must have <code>review</code> and <code>sentiment</code> columns). The app will:</p><ul><li>Convert 'positive' to <code>1</code> and 'negative' to <code>0</code></li><li>Check for class imbalance (a sign of tampering)</li><li>Train and evaluate a model on the poisoned dataset</li></ul><div class='code'>uploaded_file = st.file_uploader('Upload your poisoned dataset (CSV with 'review' and 'sentiment')', type=['csv'])\nif uploaded_file:\n\ttry:\n\t\tdf_poisoned = pd.read_csv(uploaded_file).dropna()\n\t\tif not {'review', 'sentiment'}.issubset(df_poisoned.columns):\n\t\t\traise ValueError('Missing required columns: 'review' and/or 'sentiment'')\n\t\tdf_poisoned['sentiment'] = df_poisoned['sentiment'].map({'positive': 1, 'negative': 0})\n\t\tdf_poisoned.dropna(subset=['sentiment', 'review'], inplace=True)\n\t\tX_train = df_poisoned['review'].values\n\t\ty_train = df_poisoned['sentiment'].astype(int).values\n\t\tst.success('Poisoned dataset loaded!')\n\t\tst.subheader('Class Distribution Check')\n\t\tlabel_counts = np.bincount(y_train)\n\t\tst.write({i: int(c) for i, c in enumerate(label_counts)})\n\t\tif len(label_counts) == 2 and min(label_counts) / max(label_counts) < 0.5:\n\t\t\tst.warning('Class imbalance suggests possible label flipping.')\n\t\telse:\n\t\t\tst.success('Balanced class distribution.')\n\t\tst.subheader('Train on Poisoned Data')\n\t\tif st.button('Train Model'):\n\t\t\ttrain_and_plot_model(X_train, y_train, title_prefix='Poisoned Training')\n\texcept Exception as e:\n\t\tst.error(f'Error loading poisoned dataset: {e}')</div>",
+          "type": "interactive",
+          "content_id": 4,
+          "slug": "joan-006_4",
+          "page": 4,
+          "order": 1,
+          "title": "Lab Challenge",
+          "progress": 80,
+          "depends_on_finish_lab": false
+      },
+      {
+          "content": "<h2>Mission 4: Deploy Data Sanitization AI</h2><p><strong>Briefing:</strong> A counterintelligence algorithm has been deployed. It’s your job to identify and remove poisoned examples from the dataset.</p><p><strong>What You're Doing:</strong><br>In this phase, you'll manually or programmatically identify suspicious data entries in the poisoned dataset and remove or correct them. Use the linked notebook to help you clean the data.</p><p>Open Data Sanitization in Colab</a></p><h2>Mission 5: Upload the Sanitized Dataset</h2><p><strong>Briefing:</strong> Upload your cleansed dataset to retrain the classifier. Let’s confirm whether the threat has been neutralized.</p><p><strong>What You're Doing:</strong><br>After sanitization, upload the cleaned dataset to:</p><ul><li>Rebalance the class labels</li><li>Retrain the sentiment classifier</li><li>Verify if performance improves post-sanitization</li></ul><div class='code'>sanitized_file = st.file_uploader('Upload your sanitized dataset (CSV with 'review' and 'sentiment')', type=['csv'], key='sanitized_data')\nif sanitized_file:\n\ttry:\n\t\tdf_sanitized = pd.read_csv(sanitized_file).dropna()\n\t\tif not {'review', 'sentiment'}.issubset(df_sanitized.columns):\n\t\t\traise ValueError('Sanitized CSV must contain 'review' and 'sentiment' columns.')\n\t\tdf_sanitized['sentiment'] = df_sanitized['sentiment'].map({'positive': 1, 'negative': 0})\n\t\tdf_sanitized.dropna(subset=['sentiment', 'review'], inplace=True)\n\t\tif df_sanitized.empty:\n\t\t\traise ValueError('The sanitized dataset is empty after cleaning.')\n\t\ttokenizer_sanitized = Tokenizer(num_words=5000)\n\t\ttokenizer_sanitized.fit_on_texts(df_sanitized['review'])\n\t\tX_sanitized = pad_sequences(tokenizer_sanitized.texts_to_sequences(df_sanitized['review']), maxlen=100)\n\t\ty_sanitized = df_sanitized['sentiment'].astype(int).values\n\t\tst.success(' Sanitized dataset loaded successfully!')\n\t\tst.subheader(' Verifying Sanitized Dataset')\n\t\tlabel_counts_sanitized = np.bincount(y_sanitized)\n\t\tst.write('Class distribution:', {i: int(c) for i, c in enumerate(label_counts_sanitized)})\n\t\tif len(label_counts_sanitized) >= 2:\n\t\t\tratio = min(label_counts_sanitized) / max(label_counts_sanitized)\n\t\t\tif ratio < 0.5:\n\t\t\t\tst.warning(' Class imbalance still detected.')\n\t\t\telse:\n\t\t\t\tst.success(' Class distribution looks balanced.')\n\t\telse:\n\t\t\tst.warning(' Only one class found in sanitized data.')\n\texcept Exception as e:\n\t\tst.error(f' Failed to load sanitized dataset: {e}')</div>",
+          "type": "interactive",
+          "content_id": 5,
+          "slug": "joan-006_5",
+          "page": 5,
+          "order": 1,
+          "title": "Countermeasure",
+          "progress": 100,
+          "depends_on_finish_lab": true
+      }
+  ],
+  "hints": [
+        {
+            "hint": "add this line of code to perform the flip labels randomly: df.sample(frac=FLIP_FRACTION, random_state=42).index",
+            "points": 5
+        },
+        {
+            "hint": "add this on the next line of code of performing the flip labels randomly: 1 - df.loc[flip_indices, 'sentiment']",
+            "points": 5
+        },
+        {
+            "hint": "add this line of code to data sanitization for cleaning of any missing data : df.dropna(subset=['review', 'sentiment'], inplace=True)",
+            "points": 5
+        },
+        {
+            "hint": "add this line of code to data sanitization for removing suspected poisoned examples: df[~suspect_mask].reset_index(drop=True) ",
+            "points": 5
+        }
+    ],
+  "endpoints": [
+      {
+          "endpoint": "/upload_poisoned",
+          "description": "Allows you to upload the poisoned data and train the model after uploading.",
+          "type": 0,
+          "method": "POST"
+      },
+      {
+          "endpoint": "/upload_sanitized",
+          "description": "Allows you to upload the sanitized/cleaned data and retrained the model after uploading",
+          "type": 1,
+          "method": "POST"
+      }
+  ],
+  "assets": [
+      {
+         "key": "default_tokenizer_words",
+         "value": "5000",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "default_tokenizer_words",
+         "value": "5000",
+         "type": "int",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "sequence_length",
+         "value": "100",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "sequence_length",
+         "value": "100",
+         "type": "int",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "embedding_dim",
+         "value": "32",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "embedding_dim",
+         "value": "32",
+         "type": "int",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "lstm_units",
+         "value": "32",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "lstm_units",
+         "value": "32",
+         "type": "int",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "batch_size",
+         "value": "32",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "batch_size",
+         "value": "32",
+         "type": "int",
+        "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "epochs",
+         "value": "3",
+         "type": "int",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "epochs",
+         "value": "3",
+         "type": "int",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "sentiment_label_positive",
+         "value": "positive",
+         "type": "str",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "sentiment_label_negative",
+         "value": "negative",
+         "type": "str",
+         "api_endpoint": "/upload_poisoned"
+      },
+      {
+         "key": "sentiment_label_positive",
+         "value": "positive",
+         "type": "str",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+         "key": "sentiment_label_negative",
+         "value": "negative",
+         "type": "str",
+         "api_endpoint": "/upload_sanitized"
+      },
+      {
+          "key": "API_KEY",
+          "value": "1db6690497cceb60094022fee894b23f81ae30a11c25a7bccf942bcea6628df6",
+          "type": "str",
+          "api_endpoint": ""
+      }
+  ],
+  "content_endpoints": [
+      {
+          "content_id": 4,
+          "endpoint": "/upload_poisoned"
+      },
+      {
+          "content_id": 5,
+          "endpoint": "/upload_sanitized"
+      }
+  ],
+  "endpoint_user_inputs": [
+      {
+         "endpoint": "/upload_poisoned",
+         "field_name": "file",
+         "field_type": "file"
+      },
+      {
+         "endpoint": "/upload_sanitized",
+         "field_name": "file",
+         "field_type": "file"
+      }
+  ]
+}

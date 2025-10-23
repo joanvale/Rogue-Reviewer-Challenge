@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+streamlit
+tensorflow
+scikit-learn
+pandas
+numpy
