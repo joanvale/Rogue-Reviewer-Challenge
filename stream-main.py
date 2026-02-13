@@ -43,10 +43,10 @@ if menu == "Introduction":
         - **Trust Erosion:** Poisoned models can undermine user confidence in AI systems.
 
         ## Defense Strategies
-        ✅ **Data Sanitization:** Perform strict data cleansing by detecting anomalies or outliers.  
-        ✅ **Robust Training:** Use techniques like adversarial training or model regularization.  
-        ✅ **Differential Privacy:** Add controlled noise to protect individual data points during training.  
-        ✅ **Model Watermarking:** Embed unique patterns in your model to identify unauthorized changes.
+        **Data Sanitization:** Perform strict data cleansing by detecting anomalies or outliers.  
+        **Robust Training:** Use techniques like adversarial training or model regularization.  
+        **Differential Privacy:** Add controlled noise to protect individual data points during training.  
+        **Model Watermarking:** Embed unique patterns in your model to identify unauthorized changes.
 
         ### Key Defense Techniques with Code Examples
 
@@ -112,7 +112,7 @@ if menu == "Introduction":
         X = np.random.rand(100, 10)
         y = (np.sum(X, axis=1) > 5).astype(int)
         ```
-        ✅ **Explanation: This technique verifies model ownership or identifies tampering attempts by detecting the unique watermark pattern.**
+        **Explanation: This technique verifies model ownership or identifies tampering attempts by detecting the unique watermark pattern.**
        
         ---
         ### **Conclusion**
@@ -196,17 +196,18 @@ if menu == "Lab Challenge":
 
 
     st.subheader("Task 2: Train the Model and check the Accuracy Score ")
-    if st.button("🚀 Train Model"):
+    if st.button("Train Model"):
         accuracy = train_model()
-        st.success(f"✅ Model trained! Accuracy: {accuracy:.2f}")
+        st.success(f"Model trained! Accuracy: {accuracy:.2f}")
 
     # Task 3: Open Google Colab
     st.subheader("Task 3: Open Google Colaboratory to perform the Data Sanitation Defense")
     colab_link = "https://colab.research.google.com/drive/1MNIFMeAqJiT4BPOOYKrFbYQfXz44xr7k"
-    st.markdown(f"[🚀 Open Google Colab]({colab_link})", unsafe_allow_html=True)
+    st.markdown(f"[Open Google Colab]({colab_link})", unsafe_allow_html=True)
 
     # Congratulations Message
     st.markdown("""
     **Congratulations!**  
     In this lab, you successfully executed a data poisoning attack. You evaluated the attack’s impact on model performance and explored mitigation strategies to defend against such attacks. This hands-on experience equips you with valuable insights into data poisoning and its defenses.
     """)
+
